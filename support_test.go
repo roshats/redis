@@ -2,14 +2,14 @@ package redis
 
 import "testing"
 
-func Assert(t *testing.T, val bool) {
+func Assert(t *testing.T, val bool, format string, args ...interface{}) {
 	if !val {
-		t.Fail()
+		t.Errorf(format, args...)
 	}
 }
 
-func Require(t *testing.T, val bool) {
+func Require(t *testing.T, val bool, format string, args ...interface{}) {
 	if !val {
-		t.FailNow()
+		t.Fatalf(format, args...)
 	}
 }

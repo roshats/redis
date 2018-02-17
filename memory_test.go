@@ -10,7 +10,7 @@ func TestMemoryStorage(t *testing.T) {
 
 	var s interface{} = NewMemoryStorage()
 	_, converted := s.(Storage)
-	Require(t, converted)
+	Require(t, converted, "Implements Storage interface")
 
 	t.Run("Set value then get it back", func(t *testing.T) {
 		t.Parallel()
@@ -19,11 +19,11 @@ func TestMemoryStorage(t *testing.T) {
 		ms.Set("hello", "world")
 
 		val, ok := ms.Get("hello")
-		Assert(t, ok)
-		Assert(t, val == "world")
+		Assert(t, ok, "No value presents in storage")
+		Assert(t, val == "world", "Fetched value isn't equal stored value")
 
 		_, temp := ms.ExpirationTime("hello")
-		Assert(t, !temp)
+		Assert(t, !temp, "No expiration is set")
 	})
 
 	t.Run("Multiple keys doesn't conflict", func(t *testing.T) {
@@ -34,12 +34,12 @@ func TestMemoryStorage(t *testing.T) {
 		ms.Set("key2", "value2")
 
 		val1, ok := ms.Get("key1")
-		Assert(t, ok)
-		Assert(t, val1 == "value1")
+		Assert(t, ok, "No value at key1")
+		Assert(t, val1 == "value1", "Value at key1 isn't equal to stored value")
 
 		val2, ok := ms.Get("key2")
-		Assert(t, ok)
-		Assert(t, val2 == "value2")
+		Assert(t, ok, "No value at key2")
+		Assert(t, val2 == "value2", "Value at key2 isn't equal to stored value")
 	})
 
 	t.Run("No value for the key", func(t *testing.T) {
@@ -47,7 +47,7 @@ func TestMemoryStorage(t *testing.T) {
 		ms := NewMemoryStorage()
 
 		_, ok := ms.Get("unknown")
-		Assert(t, !ok)
+		Assert(t, !ok, "Value for unknown key is provided")
 	})
 
 	t.Run("Do not return expired value", func(t *testing.T) {
@@ -55,10 +55,10 @@ func TestMemoryStorage(t *testing.T) {
 		ms := NewMemoryStorage()
 
 		ms.Set("hello", "world")
-		ms.ExpireAt("hello", Timestamp(time.Now().Add(-time.Second).Unix()))
+		ms.ExpireAt("hello", Timestamp(TimeAfter(-time.Second).Unix()))
 
 		_, ok := ms.Get("hello")
-		Assert(t, !ok)
+		Assert(t, !ok, "Expected to not return value for expired key")
 	})
 
 	t.Run("Provide expiration time", func(t *testing.T) {
@@ -66,11 +66,11 @@ func TestMemoryStorage(t *testing.T) {
 		ms := NewMemoryStorage()
 
 		ms.Set("hello", "world")
-		expected := time.Now().Add(2 * time.Minute).Unix()
+		expected := TimeAfter(2 * time.Minute).Unix()
 		ms.ExpireAt("hello", Timestamp(expected))
 
 		actual, ok := ms.ExpirationTime("hello")
-		Assert(t, ok)
-		Assert(t, expected == int64(actual))
+		Assert(t, ok, "Expiration time isn't set")
+		Assert(t, expected == int64(actual), "Expiration time isn't equal to expected")
 	})
 }

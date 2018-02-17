@@ -23,7 +23,7 @@ func NewMemoryStorage() *MemoryStorage {
 	}
 }
 
-func (ms *MemoryStorage) Get(key string) (interface{}, bool) {
+func (ms *MemoryStorage) Get(key string) (Entry, bool) {
 	expired := ms.expired(key)
 	if expired {
 		return nil, false
@@ -33,7 +33,7 @@ func (ms *MemoryStorage) Get(key string) (interface{}, bool) {
 	return val, ok
 }
 
-func (ms *MemoryStorage) Set(key string, value interface{}) {
+func (ms *MemoryStorage) Set(key string, value Entry) {
 	ms.values[key] = value
 }
 
