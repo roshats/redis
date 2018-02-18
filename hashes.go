@@ -26,6 +26,32 @@ func hgetCommand(s Storage, query Query) Result {
 	return NewStringResult(dictVal)
 }
 
+func hgetallCommand(s Storage, query Query) Result {
+	if len(query) != 1 {
+		return wrongNumberOfArgs
+	}
+
+	unlock := s.RLock()
+	defer unlock()
+
+	key := query[0]
+	value, exists := s.Get(key)
+	if !exists {
+		return ArrayResultFromListOfStrings(nil)
+	}
+
+	dict, ok := value.(map[string]string)
+	if !ok {
+		return wrongValueType
+	}
+
+	stringsArr := make([]string, 0, 2*len(dict))
+	for k, v := range dict {
+		stringsArr = append(stringsArr, k, v)
+	}
+	return ArrayResultFromListOfStrings(stringsArr)
+}
+
 func hsetCommand(s Storage, query Query) Result {
 	if len(query) != 3 {
 		return wrongNumberOfArgs

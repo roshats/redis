@@ -84,6 +84,56 @@ func TestHgetCommand(t *testing.T) {
 	})
 }
 
+func TestHgetallCommand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := hgetallCommand(s, nil)
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Stored not a hash value", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{}
+
+		result := hgetallCommand(s, []string{"key"})
+		Assert(t, result == wrongValueType, "Should return error")
+	})
+
+	t.Run("Key doesn't exist", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := hgetallCommand(s, []string{"key"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+		Assert(t, len(list) == 0, "Returns empty list")
+	})
+
+	t.Run("Returns keys and values", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		storedDict := map[string]string{"key1": "val1", "key2": "val2"}
+		s.Values["key"] = storedDict
+
+		result := hgetallCommand(s, []string{"key"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+		Require(t, len(list)%2 == 0, "Result has even number of elements")
+
+		for i := 0; i < len(list); i += 2 {
+			Assert(t, storedDict[list[i].String()] == list[i+1].String(), "Returns stored value")
+		}
+	})
+}
+
 func TestHsetCommand(t *testing.T) {
 	t.Parallel()
 
