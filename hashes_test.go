@@ -190,3 +190,65 @@ func TestHsetCommand(t *testing.T) {
 		Assert(t, s.Values["key"].(map[string]string)["dictKey"] == "newVal", "Store new value")
 	})
 }
+
+func TestHdelCommand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := hdelCommand(s, nil)
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Hash key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := hdelCommand(s, []string{"key"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Key doensn't exist", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := hdelCommand(s, []string{"key", "dictKey"})
+		value, ok := result.(intResult)
+		Require(t, ok, "Return int result")
+		Assert(t, value == 0, "Return number of deleted keys")
+	})
+
+	t.Run("Multiple keys to delete", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = map[string]string{"k1": "v1", "k2": "v2", "k3": "v3"}
+
+		result := hdelCommand(s, []string{"key", "k1", "k2", "unknown"})
+		value, ok := result.(intResult)
+		Require(t, ok, "Return int result")
+		Assert(t, value == 2, "Return number of deleted keys")
+
+		Assert(t, len(s.Values["key"].(map[string]string)) == 1, "Remove required keys")
+		Assert(t, s.Values["key"].(map[string]string)["k3"] == "v3", "Do not change value not from query")
+	})
+
+	t.Run("Delete all keys", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = map[string]string{"k1": "v1", "k2": "v2", "k3": "v3"}
+
+		result := hdelCommand(s, []string{"key", "k1", "k2", "k3"})
+		value, ok := result.(intResult)
+		Require(t, ok, "Return int result")
+		Assert(t, value == 3, "Return number of deleted keys")
+
+		_, exists := s.Values["key"]
+		Assert(t, !exists, "Remove hash when all keys are deleted")
+	})
+}

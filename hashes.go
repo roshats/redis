@@ -61,7 +61,6 @@ func hsetCommand(s Storage, query Query) Result {
 	defer unlock()
 
 	key, dictKey, dictVal := query[0], query[1], query[2]
-
 	dict, errResult := parseDict(s.Get(key))
 	if errResult != nil {
 		return errResult
@@ -77,6 +76,36 @@ func hsetCommand(s Storage, query Query) Result {
 	dict[dictKey] = dictVal
 	s.Set(key, dict)
 	return NewIntResult(result)
+}
+
+func hdelCommand(s Storage, query Query) Result {
+	if len(query) < 2 {
+		return wrongNumberOfArgs
+	}
+
+	unlock := s.Lock()
+	defer unlock()
+
+	key, dictKeysToRemove := query[0], query[1:]
+	dict, errResult := parseDict(s.Get(key))
+	if errResult != nil {
+		return errResult
+	}
+
+	deleted := 0
+	for _, k := range dictKeysToRemove {
+		if _, exists := dict[k]; exists {
+			deleted += 1
+			delete(dict, k)
+		}
+	}
+
+	if len(dict) > 0 {
+		s.Set(key, dict)
+	} else {
+		s.Del(key)
+	}
+	return NewIntResult(deleted)
 }
 
 func parseDict(value Entry, exists bool) (map[string]string, *errorResult) {
