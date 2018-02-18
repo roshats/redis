@@ -61,3 +61,107 @@ func TestLlenCommand(t *testing.T) {
 		Assert(t, value == 2, "Return list length")
 	})
 }
+
+func TestLpushCommand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := lpushCommand(s, nil)
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("No new element is provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := lpushCommand(s, []string{"key"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Should create and insert element when no list exists", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := lpushCommand(s, []string{"key", "val1", "val2"})
+		value, ok := result.(intResult)
+		Require(t, ok, "Return int result")
+		Assert(t, value == 2, "Return list length")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"val2", "val1"}),
+			"Should store new value")
+		Assert(t, len(s.Expires) == 0, "Should not set expiration")
+	})
+
+	t.Run("Should insert element when list exists", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"value1", "value2"}
+
+		result := lpushCommand(s, []string{"key", "newVal1", "newVal2"})
+		value, ok := result.(intResult)
+		Require(t, ok, "Return int result")
+		Assert(t, value == 4, "Return list length")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"newVal2", "newVal1", "value1", "value2"}),
+			"Should store new value")
+		Assert(t, len(s.Expires) == 0, "Should not set expiration")
+	})
+}
+
+func TestRpushCommand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := rpushCommand(s, nil)
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("No new element is provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := rpushCommand(s, []string{"key"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Should create and insert element when no list exists", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := rpushCommand(s, []string{"key", "val1", "val2"})
+		value, ok := result.(intResult)
+		Require(t, ok, "Return int result")
+		Assert(t, value == 2, "Return list length")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"val1", "val2"}),
+			"Should store new value")
+		Assert(t, len(s.Expires) == 0, "Should not set expiration")
+	})
+
+	t.Run("Should insert element when list exists", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"value1", "value2"}
+
+		result := rpushCommand(s, []string{"key", "newVal1", "newVal2"})
+		value, ok := result.(intResult)
+		Require(t, ok, "Return int result")
+		Assert(t, value == 4, "Return list length")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"value1", "value2", "newVal1", "newVal2"}),
+			"Should store new value")
+		Assert(t, len(s.Expires) == 0, "Should not set expiration")
+	})
+}

@@ -30,3 +30,17 @@ func AlmostEqual(t1, t2 time.Time) bool {
 func Within(t1, t2 time.Time, eps time.Duration) bool {
 	return t1.Add(-eps).Before(t2) && t1.Add(eps).After(t2)
 }
+
+func StringsListEqual(list1, list2 []string) bool {
+	if len(list1) != len(list2) {
+		return false
+	}
+
+	for i := range list1 {
+		if list1[i] != list2[i] {
+			return false
+		}
+	}
+
+	return true
+}

@@ -1,5 +1,10 @@
 package redis
 
+const (
+	insertFront = iota
+	insertBack
+)
+
 func llenCommand(s Storage, query Query) Result {
 	if len(query) != 1 {
 		return NewErrorResult(generalErrorPrefix, "wrong number of arguments")
@@ -20,4 +25,54 @@ func llenCommand(s Storage, query Query) Result {
 		return NewErrorResult(wrongTypePrefix, "Operation against a key holding the wrong kind of value")
 	}
 	return NewIntResult(len(list))
+}
+
+func lpushCommand(s Storage, query Query) Result {
+	return addToList(s, query, insertFront)
+}
+
+func rpushCommand(s Storage, query Query) Result {
+	return addToList(s, query, insertBack)
+}
+
+func addToList(s Storage, query Query, insertMode int) Result {
+	if len(query) < 2 {
+		return NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+	}
+
+	unlock := s.Lock()
+	defer unlock()
+
+	key := query[0]
+
+	newValues := query[1:]
+	if insertMode == insertFront {
+		newValues = reverseStrings(query[1:])
+	}
+
+	list, errResult := parseGetList(s.Get(key))
+	if errResult != nil {
+		return errResult
+	}
+
+	head, tail := list, newValues
+	if insertMode == insertFront {
+		head, tail = tail, head
+	}
+
+	newList := append(head, tail...)
+	s.Set(key, newList)
+	return NewIntResult(len(newList))
+}
+
+func parseGetList(value Entry, exists bool) ([]string, *errorResult) {
+	if !exists {
+		return nil, nil
+	}
+
+	list, ok := value.([]string)
+	if !ok {
+		return nil, NewErrorResult(wrongTypePrefix, "Operation against a key holding the wrong kind of value")
+	}
+	return list, nil
 }
