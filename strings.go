@@ -8,7 +8,7 @@ import (
 
 func getCommand(s Storage, query Query) Result {
 	if len(query) != 1 {
-		return NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+		return wrongNumberOfArgs
 	}
 
 	unlock := s.RLock()
@@ -21,7 +21,7 @@ func getCommand(s Storage, query Query) Result {
 	}
 	stringValue, ok := value.(string)
 	if !ok {
-		return NewErrorResult(wrongTypePrefix, "Operation against a key holding the wrong kind of value")
+		return wrongValueType
 	}
 	return NewStringResult(stringValue)
 }
@@ -66,7 +66,7 @@ func parseSetCommand(queries Query) (key string, value string, expiration int64,
 		}
 	default:
 		if len(queries) < 2 {
-			result = NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+			result = wrongNumberOfArgs
 			return
 		}
 	}
@@ -75,7 +75,7 @@ func parseSetCommand(queries Query) (key string, value string, expiration int64,
 
 func updateCommand(s Storage, query Query) Result {
 	if len(query) != 2 {
-		return NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+		return wrongNumberOfArgs
 	}
 
 	unlock := s.Lock()

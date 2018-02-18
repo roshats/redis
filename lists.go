@@ -9,7 +9,7 @@ const (
 
 func llenCommand(s Storage, query Query) Result {
 	if len(query) != 1 {
-		return NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+		return wrongNumberOfArgs
 	}
 
 	unlock := s.RLock()
@@ -24,7 +24,7 @@ func llenCommand(s Storage, query Query) Result {
 
 	list, ok := value.([]string)
 	if !ok {
-		return NewErrorResult(wrongTypePrefix, "Operation against a key holding the wrong kind of value")
+		return wrongValueType
 	}
 	return NewIntResult(len(list))
 }
@@ -83,7 +83,7 @@ func getSubList(s Storage, key string, start, end int) ([]string, *errorResult) 
 
 func parseLrangeQuery(query Query) (key string, start, end int, errResult *errorResult) {
 	if len(query) != 3 {
-		errResult = NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+		errResult = wrongNumberOfArgs
 		return
 	}
 
@@ -136,7 +136,7 @@ func rpushCommand(s Storage, query Query) Result {
 
 func addToList(s Storage, query Query, insertMode int) Result {
 	if len(query) < 2 {
-		return NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+		return wrongNumberOfArgs
 	}
 
 	unlock := s.Lock()
@@ -179,7 +179,7 @@ func rpopCommand(s Storage, query Query) Result {
 
 func popFromList(s Storage, query Query, popper func([]string) (string, []string)) Result {
 	if len(query) != 1 {
-		return NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+		return wrongNumberOfArgs
 	}
 
 	unlock := s.Lock()
@@ -206,7 +206,7 @@ func parseGetList(value Entry, exists bool) ([]string, *errorResult) {
 
 	list, ok := value.([]string)
 	if !ok {
-		return nil, NewErrorResult(wrongTypePrefix, "Operation against a key holding the wrong kind of value")
+		return nil, wrongValueType
 	}
 	return list, nil
 }

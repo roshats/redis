@@ -5,6 +5,11 @@ const (
 	wrongTypePrefix    = "WRONGTYPE"
 )
 
+var (
+	wrongNumberOfArgs = NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+	wrongValueType    = NewErrorResult(wrongTypePrefix, "Operation against a key holding the wrong kind of value")
+)
+
 type errorResult struct {
 	prefix, message string
 }
