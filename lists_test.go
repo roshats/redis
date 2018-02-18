@@ -203,17 +203,122 @@ func TestLrangeCommand(t *testing.T) {
 		}
 		Assert(t, StringsListEqual(stringsList, []string{"val1", "val2", "val3"}), "Returns stored list")
 	})
+}
 
-	t.Run("Out of range", func(t *testing.T) {
+func TestLtrimCommand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := ltrimCommand(s, nil)
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Stop argument is not provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := ltrimCommand(s, []string{"key", "0"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Not int range", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := ltrimCommand(s, []string{"key", "0", "end"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error. Got %#v", result)
+	})
+
+	t.Run("Key doesn't exist", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := ltrimCommand(s, []string{"key", "0", "-1"})
+		Assert(t, result == OKResult, "Returns OK")
+	})
+
+	t.Run("Return array", func(t *testing.T) {
 		t.Parallel()
 
 		s := NewMockStorage()
 		s.Values["key"] = []string{"val1", "val2", "val3"}
 
-		result := lrangeCommand(s, []string{"key", "3", "-1"})
-		list, ok := result.(arrayResult)
-		Require(t, ok, "Returns array result")
-		Assert(t, len(list) == 0, "Returns empty list")
+		result := ltrimCommand(s, []string{"key", "0", "2"})
+		Assert(t, result == OKResult, "Returns OK")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"val1", "val2", "val3"}),
+			"Updates stored list")
+	})
+
+	t.Run("Negative start", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := ltrimCommand(s, []string{"key", "-2", "2"})
+		Assert(t, result == OKResult, "Returns OK")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"val2", "val3"}),
+			"Updates stored list")
+	})
+
+	t.Run("Big negative start", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := ltrimCommand(s, []string{"key", "-100", "2"})
+		Assert(t, result == OKResult, "Returns OK")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"val1", "val2", "val3"}),
+			"Updates stored list")
+	})
+
+	t.Run("Big start", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := ltrimCommand(s, []string{"key", "100", "-1"})
+		Assert(t, result == OKResult, "Returns OK")
+
+		_, exists := s.Values["key"]
+		Assert(t, !exists, "Return key when result array is empty")
+	})
+
+	t.Run("Negative end", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := ltrimCommand(s, []string{"key", "0", "-2"})
+		Assert(t, result == OKResult, "Returns OK")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"val1", "val2"}),
+			"Updates stored list")
+	})
+
+	t.Run("Big end", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := ltrimCommand(s, []string{"key", "0", "100"})
+		Assert(t, result == OKResult, "Returns OK")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"val1", "val2", "val3"}),
+			"Updates stored list")
 	})
 }
 

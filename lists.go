@@ -38,16 +38,47 @@ func lrangeCommand(s Storage, query Query) Result {
 	unlock := s.RLock()
 	defer unlock()
 
-	list, errResult := parseGetList(s.Get(key))
+	list, errResult := getSubList(s, key, start, end)
 	if errResult != nil {
 		return errResult
 	}
 
+	return ArrayResultFromListOfStrings(list)
+}
+
+func ltrimCommand(s Storage, query Query) Result {
+	key, start, end, errResult := parseLrangeQuery(query)
+	if errResult != nil {
+		return errResult
+	}
+
+	unlock := s.Lock()
+	defer unlock()
+
+	list, errResult := getSubList(s, key, start, end)
+	if errResult != nil {
+		return errResult
+	}
+
+	if len(list) > 0 {
+		s.Set(key, list)
+	} else {
+		s.Del(key)
+	}
+	return OKResult
+}
+
+func getSubList(s Storage, key string, start, end int) ([]string, *errorResult) {
+	list, errResult := parseGetList(s.Get(key))
+	if errResult != nil {
+		return nil, errResult
+	}
+
 	start, end, empty := adjustRangeIndices(len(list), start, end)
 	if empty {
-		return ArrayResultFromListOfStrings(nil)
+		return nil, nil
 	}
-	return ArrayResultFromListOfStrings(list[start : end+1])
+	return list[start : end+1], nil
 }
 
 func parseLrangeQuery(query Query) (key string, start, end int, errResult *errorResult) {
