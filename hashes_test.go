@@ -83,3 +83,60 @@ func TestHgetCommand(t *testing.T) {
 		Assert(t, str == "", "Returns stored value")
 	})
 }
+
+func TestHsetCommand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := hsetCommand(s, nil)
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Hash key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := hsetCommand(s, []string{"key"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("New value doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := hsetCommand(s, []string{"key", "dictKey"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Set value for new key", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := hsetCommand(s, []string{"key", "dictKey", "value"})
+		value, ok := result.(intResult)
+		Require(t, ok, "Return int result")
+		Assert(t, value == 1, "New hash key")
+
+		Assert(t, s.Values["key"].(map[string]string)["dictKey"] == "value", "Store new value")
+	})
+
+	t.Run("Set value for existing key", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = map[string]string{"dictKey": "value"}
+
+		result := hsetCommand(s, []string{"key", "dictKey", "newVal"})
+		value, ok := result.(intResult)
+		Require(t, ok, "Return int result")
+		Assert(t, value == 0, "New hash key")
+
+		Assert(t, s.Values["key"].(map[string]string)["dictKey"] == "newVal", "Store new value")
+	})
+}
