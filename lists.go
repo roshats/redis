@@ -65,6 +65,41 @@ func addToList(s Storage, query Query, insertMode int) Result {
 	return NewIntResult(len(newList))
 }
 
+func lpopCommand(s Storage, query Query) Result {
+	return popFromList(s, query, func(list []string) (string, []string) {
+		return list[0], list[1:]
+	})
+}
+
+func rpopCommand(s Storage, query Query) Result {
+	return popFromList(s, query, func(list []string) (string, []string) {
+		lastIndex := len(list) - 1
+		return list[lastIndex], list[:lastIndex]
+	})
+}
+
+func popFromList(s Storage, query Query, popper func([]string) (string, []string)) Result {
+	if len(query) != 1 {
+		return NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+	}
+
+	unlock := s.Lock()
+	defer unlock()
+
+	key := query[0]
+	list, errResult := parseGetList(s.Get(key))
+	if errResult != nil {
+		return errResult
+	}
+	if len(list) == 0 {
+		return NilResult
+	}
+
+	result, newList := popper(list)
+	s.Set(key, newList)
+	return NewStringResult(result)
+}
+
 func parseGetList(value Entry, exists bool) ([]string, *errorResult) {
 	if !exists {
 		return nil, nil

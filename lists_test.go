@@ -165,3 +165,75 @@ func TestRpushCommand(t *testing.T) {
 		Assert(t, len(s.Expires) == 0, "Should not set expiration")
 	})
 }
+
+func TestLpopCommand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := lpopCommand(s, nil)
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Empty list", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := lpopCommand(s, []string{"key"})
+		Assert(t, result == NilResult, "Should return nil")
+	})
+
+	t.Run("List exists", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := lpopCommand(s, []string{"key"})
+		str, ok := result.(stringResult)
+		Require(t, ok, "Should return string")
+		Assert(t, str == "val1", "Result should match stored value")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"val2", "val3"}),
+			"Should update stored value")
+	})
+}
+
+func TestRpopCommand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := rpopCommand(s, nil)
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Empty list", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := rpopCommand(s, []string{"key"})
+		Assert(t, result == NilResult, "Should return nil")
+	})
+
+	t.Run("List exists", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := rpopCommand(s, []string{"key"})
+		str, ok := result.(stringResult)
+		Require(t, ok, "Should return string")
+		Assert(t, str == "val3", "Result should match stored value")
+
+		Assert(t, StringsListEqual(s.Values["key"].([]string), []string{"val1", "val2"}),
+			"Should update stored value")
+	})
+}
