@@ -17,7 +17,7 @@ func getCommand(s Storage, query Query) Result {
 	key := query[0]
 	value, exists := s.Get(key)
 	if !exists {
-		return nil
+		return NilResult
 	}
 	stringValue, ok := value.(string)
 	if !ok {

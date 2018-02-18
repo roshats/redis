@@ -43,7 +43,7 @@ func TestGetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := getCommand(s, []string{"key"})
-		Assert(t, result == nil, "Should return nil when associated value found")
+		Assert(t, result == NilResult, "Should return nil when associated value found")
 	})
 }
 
