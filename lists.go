@@ -1,5 +1,7 @@
 package redis
 
+import "strconv"
+
 const (
 	insertFront = iota
 	insertBack
@@ -25,6 +27,72 @@ func llenCommand(s Storage, query Query) Result {
 		return NewErrorResult(wrongTypePrefix, "Operation against a key holding the wrong kind of value")
 	}
 	return NewIntResult(len(list))
+}
+
+func lrangeCommand(s Storage, query Query) Result {
+	key, start, end, errResult := parseLrangeQuery(query)
+	if errResult != nil {
+		return errResult
+	}
+
+	unlock := s.RLock()
+	defer unlock()
+
+	list, errResult := parseGetList(s.Get(key))
+	if errResult != nil {
+		return errResult
+	}
+
+	start, end, empty := adjustRangeIndices(len(list), start, end)
+	if empty {
+		return ArrayResultFromListOfStrings(nil)
+	}
+	return ArrayResultFromListOfStrings(list[start : end+1])
+}
+
+func parseLrangeQuery(query Query) (key string, start, end int, errResult *errorResult) {
+	if len(query) != 3 {
+		errResult = NewErrorResult(generalErrorPrefix, "wrong number of arguments")
+		return
+	}
+
+	key = query[0]
+
+	var err error
+	if start, err = strconv.Atoi(query[1]); err != nil {
+		errResult = NewErrorResult(generalErrorPrefix, "value is not an integer or out of range")
+		return
+	}
+	if end, err = strconv.Atoi(query[2]); err != nil {
+		errResult = NewErrorResult(generalErrorPrefix, "value is not an integer or out of range")
+		return
+	}
+	return
+}
+
+func adjustRangeIndices(length, start, end int) (_ int, _ int, empty bool) {
+	// Make start non-negative
+	if start < -length {
+		start = 0
+	} else if start < 0 {
+		start = length + start
+	}
+
+	if end < 0 {
+		end = length + end
+	}
+
+	if start > end || start >= length {
+		return 0, 0, true
+	}
+	// Here we know for sure that end is positive since
+	// start is non-negative and start <= end.
+
+	if end >= length {
+		end = length - 1
+	}
+
+	return start, end, false
 }
 
 func lpushCommand(s Storage, query Query) Result {

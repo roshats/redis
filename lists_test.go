@@ -62,6 +62,161 @@ func TestLlenCommand(t *testing.T) {
 	})
 }
 
+func TestLrangeCommand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Key doesn't provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := lrangeCommand(s, nil)
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Stop argument is not provided", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := lrangeCommand(s, []string{"key", "0"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+	})
+
+	t.Run("Not int range", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := lrangeCommand(s, []string{"key", "0", "end"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error. Got %#v", result)
+	})
+
+	t.Run("Key doesn't exist", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := lrangeCommand(s, []string{"key", "0", "-1"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+		Assert(t, len(list) == 0, "Returns empty list")
+	})
+
+	t.Run("Return array", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := lrangeCommand(s, []string{"key", "0", "2"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+
+		var stringsList []string
+		for _, e := range list {
+			stringsList = append(stringsList, e.String())
+		}
+		Assert(t, StringsListEqual(stringsList, []string{"val1", "val2", "val3"}), "Returns stored list")
+	})
+
+	t.Run("Negative start", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := lrangeCommand(s, []string{"key", "-2", "2"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+
+		var stringsList []string
+		for _, e := range list {
+			stringsList = append(stringsList, e.String())
+		}
+		Assert(t, StringsListEqual(stringsList, []string{"val2", "val3"}), "Returns stored list")
+	})
+
+	t.Run("Big negative start", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := lrangeCommand(s, []string{"key", "-100", "2"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+
+		var stringsList []string
+		for _, e := range list {
+			stringsList = append(stringsList, e.String())
+		}
+		Assert(t, StringsListEqual(stringsList, []string{"val1", "val2", "val3"}), "Returns stored list")
+	})
+
+	t.Run("Big start", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := lrangeCommand(s, []string{"key", "100", "-1"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+
+		var stringsList []string
+		for _, e := range list {
+			stringsList = append(stringsList, e.String())
+		}
+		Assert(t, len(list) == 0, "Returns empty list")
+	})
+
+	t.Run("Negative end", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := lrangeCommand(s, []string{"key", "0", "-2"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+
+		var stringsList []string
+		for _, e := range list {
+			stringsList = append(stringsList, e.String())
+		}
+		Assert(t, StringsListEqual(stringsList, []string{"val1", "val2"}), "Returns stored list")
+	})
+
+	t.Run("Big end", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := lrangeCommand(s, []string{"key", "0", "100"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+
+		var stringsList []string
+		for _, e := range list {
+			stringsList = append(stringsList, e.String())
+		}
+		Assert(t, StringsListEqual(stringsList, []string{"val1", "val2", "val3"}), "Returns stored list")
+	})
+
+	t.Run("Out of range", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		s.Values["key"] = []string{"val1", "val2", "val3"}
+
+		result := lrangeCommand(s, []string{"key", "3", "-1"})
+		list, ok := result.(arrayResult)
+		Require(t, ok, "Returns array result")
+		Assert(t, len(list) == 0, "Returns empty list")
+	})
+}
+
 func TestLpushCommand(t *testing.T) {
 	t.Parallel()
 
