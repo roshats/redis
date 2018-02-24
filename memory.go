@@ -24,8 +24,7 @@ func NewMemoryStorage() *MemoryStorage {
 }
 
 func (ms *MemoryStorage) Get(key string) (Entry, bool) {
-	expired := ms.expired(key)
-	if expired {
+	if t, ok := ms.expires[key]; ok && timeExpired(t) {
 		return nil, false
 	}
 
@@ -47,8 +46,10 @@ func (ms *MemoryStorage) ExpireAt(key string, timestamp Timestamp) {
 }
 
 func (ms *MemoryStorage) ExpirationTime(key string) (Timestamp, bool) {
-	t, ok := ms.expires[key]
-	return t, ok
+	if t, ok := ms.expires[key]; ok && !timeExpired(t) {
+		return t, ok
+	}
+	return 0, false
 }
 
 func (ms *MemoryStorage) RemoveExpiration(key string) {
@@ -65,7 +66,6 @@ func (ms *MemoryStorage) RLock() func() {
 	return ms.mu.RUnlock
 }
 
-func (ms *MemoryStorage) expired(key string) bool {
-	expiration, ok := ms.ExpirationTime(key)
-	return ok && time.Unix(int64(expiration), 0).Before(time.Now())
+func timeExpired(t Timestamp) bool {
+	return time.Unix(int64(t), 0).Before(time.Now())
 }

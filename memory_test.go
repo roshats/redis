@@ -73,4 +73,15 @@ func TestMemoryStorage(t *testing.T) {
 		Assert(t, ok, "Expiration time isn't set")
 		Assert(t, expected == int64(actual), "Expiration time isn't equal to expected")
 	})
+
+	t.Run("No expiration time for expired key", func(t *testing.T) {
+		t.Parallel()
+		ms := NewMemoryStorage()
+
+		ms.Set("hello", "world")
+		ms.ExpireAt("hello", Timestamp(TimeAfter(-time.Second).Unix()))
+
+		_, ok := ms.ExpirationTime("hello")
+		Assert(t, !ok, "Should not return expiration time")
+	})
 }
