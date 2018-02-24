@@ -49,3 +49,22 @@ func expireCommand(s Storage, query Query) Result {
 	s.ExpireAt(key, Timestamp(expirationTime))
 	return NewIntResult(1)
 }
+
+func delCommand(s Storage, query Query) Result {
+	if len(query) < 1 {
+		return wrongNumberOfArgs
+	}
+
+	unlock := s.Lock()
+	defer unlock()
+
+	deleted := 0
+	for _, k := range query {
+		if _, exists := s.Get(k); exists {
+			deleted += 1
+			s.Del(k)
+		}
+	}
+
+	return NewIntResult(deleted)
+}
