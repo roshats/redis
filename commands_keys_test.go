@@ -41,21 +41,23 @@ func TestTtlCommand(t *testing.T) {
 		Assert(t, val == -1, "Should return -2")
 	})
 
-	t.Run("Returns expiration time", func(t *testing.T) {
+	t.Run("Returns TTL time", func(t *testing.T) {
 		t.Parallel()
 
 		s := NewMockStorage()
 
-		expirationTime := TimeAfter(time.Minute).Unix()
+		expirationTime := TimeAfter(time.Minute)
 		unlock := s.Lock()
 		s.Set("key", "value")
-		s.ExpireAt("key", Timestamp(expirationTime))
+		s.ExpireAt("key", Timestamp(expirationTime.Unix()))
 		unlock()
 
 		result := ttlCommand(s, []string{"key"})
 		val, ok := result.(intResult)
 		Require(t, ok, "Should return int")
-		Assert(t, expirationTime == int64(val), "Should return -2")
+
+		Assert(t, AlmostEqual(time.Now().Add(time.Duration(val)*time.Second), expirationTime),
+			"Should return TTL")
 	})
 }
 

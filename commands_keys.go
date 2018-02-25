@@ -23,7 +23,9 @@ func ttlCommand(s Storage, query Query) Result {
 		return NewIntResult(-1)
 	}
 
-	return NewIntResult(int(expirationTime))
+	duration := time.Unix(int64(expirationTime), 0).Sub(time.Now())
+	seconds := duration.Nanoseconds() / int64(time.Second)
+	return NewIntResult(int(seconds))
 }
 
 func expireCommand(s Storage, query Query) Result {
