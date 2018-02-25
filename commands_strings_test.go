@@ -61,6 +61,17 @@ func TestSetCommand(t *testing.T) {
 		Assert(t, len(s.Expires) == 0, "No expiration should be set when error happened")
 	})
 
+	t.Run("Three arguments", func(t *testing.T) {
+		t.Parallel()
+
+		s := NewMockStorage()
+		result := setCommand(s, []string{"foo", "bar", "baz"})
+		_, ok := result.(*errorResult)
+		Require(t, ok, "Should return error")
+		Assert(t, len(s.Values) == 0, "No value should be set when error happened")
+		Assert(t, len(s.Expires) == 0, "No expiration should be set when error happened")
+	})
+
 	t.Run("Invalid expiration", func(t *testing.T) {
 		t.Parallel()
 

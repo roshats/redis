@@ -65,10 +65,8 @@ func parseSetCommand(queries Query) (key string, value string, expiration int64,
 			return
 		}
 	default:
-		if len(queries) < 2 {
-			result = wrongNumberOfArgs
-			return
-		}
+		result = wrongNumberOfArgs
+		return
 	}
 	return
 }
