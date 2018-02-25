@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"context"
 	"testing"
 	"time"
 )
@@ -8,13 +9,15 @@ import (
 func TestMemoryStorage(t *testing.T) {
 	t.Parallel()
 
-	var s interface{} = NewMemoryStorage()
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	var s interface{} = NewMemoryStorage(ctx)
 	_, converted := s.(Storage)
 	Require(t, converted, "Implements Storage interface")
 
 	t.Run("Set value then get it back", func(t *testing.T) {
 		t.Parallel()
-		ms := NewMemoryStorage()
+		ms := memoryStorageWithoutCycles()
 
 		ms.Set("hello", "world")
 
@@ -28,7 +31,7 @@ func TestMemoryStorage(t *testing.T) {
 
 	t.Run("Multiple keys doesn't conflict", func(t *testing.T) {
 		t.Parallel()
-		ms := NewMemoryStorage()
+		ms := memoryStorageWithoutCycles()
 
 		ms.Set("key1", "value1")
 		ms.Set("key2", "value2")
@@ -44,7 +47,7 @@ func TestMemoryStorage(t *testing.T) {
 
 	t.Run("No value for the key", func(t *testing.T) {
 		t.Parallel()
-		ms := NewMemoryStorage()
+		ms := memoryStorageWithoutCycles()
 
 		_, ok := ms.Get("unknown")
 		Assert(t, !ok, "Value for unknown key is provided")
@@ -52,7 +55,7 @@ func TestMemoryStorage(t *testing.T) {
 
 	t.Run("Do not return expired value", func(t *testing.T) {
 		t.Parallel()
-		ms := NewMemoryStorage()
+		ms := memoryStorageWithoutCycles()
 
 		ms.Set("hello", "world")
 		ms.ExpireAt("hello", Timestamp(TimeAfter(-time.Second).Unix()))
@@ -63,7 +66,7 @@ func TestMemoryStorage(t *testing.T) {
 
 	t.Run("Provide expiration time", func(t *testing.T) {
 		t.Parallel()
-		ms := NewMemoryStorage()
+		ms := memoryStorageWithoutCycles()
 
 		ms.Set("hello", "world")
 		expected := TimeAfter(2 * time.Minute).Unix()
@@ -83,7 +86,7 @@ func TestMemoryStorage(t *testing.T) {
 
 	t.Run("No expiration time for expired key", func(t *testing.T) {
 		t.Parallel()
-		ms := NewMemoryStorage()
+		ms := memoryStorageWithoutCycles()
 
 		ms.Set("hello", "world")
 		ms.ExpireAt("hello", Timestamp(TimeAfter(-time.Second).Unix()))
@@ -96,7 +99,7 @@ func TestMemoryStorage(t *testing.T) {
 func TestMemoryStorage_runExpirationCycle(t *testing.T) {
 	t.Parallel()
 
-	ms := NewMemoryStorage()
+	ms := memoryStorageWithoutCycles()
 	for _, k := range []string{"a", "b", "c", "d", "e"} {
 		ms.Set(k, "value")
 	}
@@ -126,4 +129,10 @@ func TestMemoryStorage_runExpirationCycle(t *testing.T) {
 		_, exists := ms.Get(k)
 		Assert(t, !exists, "Key '%s' should be removed", k)
 	}
+}
+
+func memoryStorageWithoutCycles() *MemoryStorage {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	return NewMemoryStorage(ctx)
 }

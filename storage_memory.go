@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"context"
 	"sync"
 	"time"
 )
@@ -17,12 +18,14 @@ type MemoryStorage struct {
 	mu sync.RWMutex // Do not embed to keep it private
 }
 
-func NewMemoryStorage() *MemoryStorage {
-	return &MemoryStorage{
+func NewMemoryStorage(ctx context.Context) *MemoryStorage {
+	ms := &MemoryStorage{
 		values:           make(map[string]Entry),
 		expirations:      make(map[string]Timestamp),
 		expirationsQueue: NewExpirationQueue(),
 	}
+	go scheduleExpirationCycle(ms, ctx)
+	return ms
 }
 
 func (ms *MemoryStorage) Get(key string) (Entry, bool) {
@@ -71,6 +74,17 @@ func (ms *MemoryStorage) RLock() func() {
 
 func timeExpired(t Timestamp) bool {
 	return time.Unix(int64(t), 0).Before(time.Now())
+}
+
+func scheduleExpirationCycle(ms *MemoryStorage, ctx context.Context) {
+	for {
+		select {
+		case <-time.After(time.Minute):
+			runExpirationCycle(ms)
+		case <-ctx.Done():
+			break
+		}
+	}
 }
 
 func runExpirationCycle(ms *MemoryStorage) {
