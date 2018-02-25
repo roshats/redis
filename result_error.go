@@ -1,5 +1,7 @@
 package redis
 
+import "github.com/roshats/redis/internal/respgo"
+
 const (
 	generalErrorPrefix = "ERR"
 	wrongTypePrefix    = "WRONGTYPE"
@@ -20,4 +22,8 @@ func NewErrorResult(prefix, message string) *errorResult {
 
 func (r *errorResult) String() string {
 	return r.prefix + " " + r.message
+}
+
+func (r *errorResult) MarshalRESP() []byte {
+	return respgo.EncodeError(r.String())
 }
