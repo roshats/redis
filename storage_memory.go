@@ -11,15 +11,17 @@ type MemoryStorage struct {
 
 	// Mapping between keys and expiration time.
 	// Expiration time is stored separately from values to save space.
-	expirations map[string]Timestamp
+	expirations      map[string]Timestamp
+	expirationsQueue *ExpirationQueue
 
 	mu sync.RWMutex // Do not embed to keep it private
 }
 
 func NewMemoryStorage() *MemoryStorage {
 	return &MemoryStorage{
-		values:      make(map[string]Entry),
-		expirations: make(map[string]Timestamp),
+		values:           make(map[string]Entry),
+		expirations:      make(map[string]Timestamp),
+		expirationsQueue: NewExpirationQueue(),
 	}
 }
 
@@ -42,6 +44,7 @@ func (ms *MemoryStorage) Del(key string) {
 }
 
 func (ms *MemoryStorage) ExpireAt(key string, timestamp Timestamp) {
+	ms.expirationsQueue.Push(key, timestamp)
 	ms.expirations[key] = timestamp
 }
 

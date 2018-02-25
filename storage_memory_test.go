@@ -72,6 +72,13 @@ func TestMemoryStorage(t *testing.T) {
 		actual, ok := ms.ExpirationTime("hello")
 		Assert(t, ok, "Expiration time isn't set")
 		Assert(t, expected == int64(actual), "Expiration time isn't equal to expected")
+
+		t.Run("Put to expiration queue", func(t *testing.T) {
+			key, timestamp, exists := ms.expirationsQueue.Root()
+			Require(t, exists, "Should put to queue")
+			Assert(t, key == "hello", "Put correct key")
+			Assert(t, int64(timestamp) == expected, "Put correct timestamp")
+		})
 	})
 
 	t.Run("No expiration time for expired key", func(t *testing.T) {
