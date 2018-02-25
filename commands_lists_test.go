@@ -1,9 +1,6 @@
 package redis
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 func TestLlenCommand(t *testing.T) {
 	t.Parallel()
@@ -43,7 +40,6 @@ func TestLlenCommand(t *testing.T) {
 		s.Values["key"] = []string{}
 
 		result := llenCommand(s, []string{"key"})
-		fmt.Printf("result: %#v\n", result)
 		value, ok := result.(intResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 0, "Return 0 for empty list")
