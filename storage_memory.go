@@ -72,3 +72,38 @@ func (ms *MemoryStorage) RLock() func() {
 func timeExpired(t Timestamp) bool {
 	return time.Unix(int64(t), 0).Before(time.Now())
 }
+
+func runExpirationCycle(ms *MemoryStorage) {
+	// Assume that most of the times there is nothing to expire.
+	// Hence use just RLock to check the assumption.
+	if !isAnythingToExpire(ms) {
+		return
+	}
+
+	unlock := ms.Lock()
+	defer unlock()
+
+	for {
+		k, qt, exists := ms.expirationsQueue.Root()
+
+		// Break expiration cycle when there is no more items in queue or
+		// when lowest expiration time is in future.
+		if !exists || !timeExpired(qt) {
+			break
+		}
+
+		ms.expirationsQueue.Pop()
+		t, exists := ms.expirations[k]
+		if exists && timeExpired(t) {
+			ms.Del(k)
+		}
+	}
+}
+
+func isAnythingToExpire(ms *MemoryStorage) bool {
+	unlock := ms.RLock()
+	defer unlock()
+
+	_, t, exists := ms.expirationsQueue.Root()
+	return exists && timeExpired(t)
+}

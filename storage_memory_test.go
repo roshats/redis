@@ -92,3 +92,38 @@ func TestMemoryStorage(t *testing.T) {
 		Assert(t, !ok, "Should not return expiration time")
 	})
 }
+
+func TestMemoryStorage_runExpirationCycle(t *testing.T) {
+	t.Parallel()
+
+	ms := NewMemoryStorage()
+	for _, k := range []string{"a", "b", "c", "d", "e"} {
+		ms.Set(k, "value")
+	}
+
+	ms.ExpireAt("a", Timestamp(TimeAfter(-time.Minute).Unix()))
+	ms.ExpireAt("b", Timestamp(TimeAfter(time.Minute).Unix()))
+
+	// Change expiration time. Latest in future
+	ms.ExpireAt("c", Timestamp(TimeAfter(-time.Minute).Unix()))
+	ms.ExpireAt("c", Timestamp(TimeAfter(time.Minute).Unix()))
+
+	// Change expiration time. Latest in past
+	ms.ExpireAt("d", Timestamp(TimeAfter(-time.Minute).Unix()))
+	ms.ExpireAt("d", Timestamp(TimeAfter(time.Minute).Unix()))
+	ms.ExpireAt("d", Timestamp(TimeAfter(-time.Minute).Unix()))
+
+	// Expiration removed
+	ms.ExpireAt("e", Timestamp(TimeAfter(-time.Minute).Unix()))
+	ms.RemoveExpiration("e")
+
+	runExpirationCycle(ms)
+
+	Assert(t, len(ms.values) == 3, "Only three values left. Got %d", len(ms.values))
+	Assert(t, len(ms.expirations) == 2, "Only three values left. Got %d", len(ms.expirations))
+
+	for _, k := range []string{"a", "d"} {
+		_, exists := ms.Get(k)
+		Assert(t, !exists, "Key '%s' should be removed", k)
+	}
+}
