@@ -4,7 +4,10 @@ import "fmt"
 
 type Query []string
 
-type Result fmt.Stringer
+type Result interface {
+	fmt.Stringer
+	MarshalRESP() []byte
+}
 
 func reverseStrings(list []string) []string {
 	length := len(list)
