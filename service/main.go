@@ -9,6 +9,6 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	ms := redis.NewMemoryStorage(ctx)
-	r := redis.NewServer(ms, redis.CommandsMap)
+	r := redis.NewServer(ms, redis.CommandsMap, "password")
 	redis.StartTCPServer(r, "16379")
 }

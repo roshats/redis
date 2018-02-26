@@ -3,12 +3,14 @@ package redis
 type Server struct {
 	storage  Storage
 	commands map[string]commandFunc
+	password string
 }
 
-func NewServer(storage Storage, commands map[string]commandFunc) *Server {
+func NewServer(storage Storage, commands map[string]commandFunc, password string) *Server {
 	return &Server{
 		storage:  storage,
 		commands: commands,
+		password: password,
 	}
 }
 
@@ -19,4 +21,8 @@ func (s *Server) ProcessCommand(command string, args Query) Result {
 	}
 
 	return fun(s.storage, args)
+}
+
+func (s *Server) Password() string {
+	return s.password
 }

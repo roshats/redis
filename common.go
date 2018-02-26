@@ -6,6 +6,11 @@ type CommandProcessor interface {
 	ProcessCommand(string, Query) Result
 }
 
+type ServerInterface interface {
+	CommandProcessor
+	Password() string
+}
+
 type Query []string
 
 type Result interface {
