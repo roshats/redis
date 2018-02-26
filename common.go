@@ -2,6 +2,10 @@ package redis
 
 import "fmt"
 
+type CommandProcessor interface {
+	ProcessCommand(string, Query) Result
+}
+
 type Query []string
 
 type Result interface {

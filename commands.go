@@ -1,7 +1,5 @@
 package redis
 
-import "strings"
-
 type commandFunc func(Storage, Query) Result
 
 var CommandsMap = map[string]commandFunc{
@@ -25,12 +23,4 @@ var CommandsMap = map[string]commandFunc{
 	"hgetall": hgetallCommand,
 	"hset":    hsetCommand,
 	"hdel":    hdelCommand,
-}
-
-func StringToCommand(s string) (string, Query, Result) {
-	arr := strings.Fields(s)
-	if len(arr) == 0 {
-		return "", nil, NewErrorResult(generalErrorPrefix, "Can't parse command")
-	}
-	return arr[0], arr[1:], nil
 }
