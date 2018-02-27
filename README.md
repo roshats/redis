@@ -1,5 +1,12 @@
 # Simple sub-redis implementation
 
+Available commands:
+* Strings: `get`, `set`, `update`.
+* Keys: `ttl`, `expire`, `del`.
+* Lists: `llen`, `lrange`, `ltrim`, `lpush`, `rpush`, `lpop`, `rpop`.
+* Hashes: `hget`, `hgetall`, `hset`, `hdel`.
+* Connection: `auth`, `quit`.
+
 Run server:
 
 ```
@@ -55,4 +62,6 @@ OK
 OK
 127.0.0.1:16379> ttl foo
 (integer) -1
+127.0.0.1:16379> quit
+$
 ```
