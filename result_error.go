@@ -12,18 +12,18 @@ var (
 	wrongValueType    = NewErrorResult(wrongTypePrefix, "Operation against a key holding the wrong kind of value")
 )
 
-type errorResult struct {
+type ErrorResult struct {
 	prefix, message string
 }
 
-func NewErrorResult(prefix, message string) *errorResult {
-	return &errorResult{prefix: prefix, message: message}
+func NewErrorResult(prefix, message string) *ErrorResult {
+	return &ErrorResult{prefix: prefix, message: message}
 }
 
-func (r *errorResult) String() string {
+func (r *ErrorResult) String() string {
 	return r.prefix + " " + r.message
 }
 
-func (r *errorResult) MarshalRESP() []byte {
+func (r *ErrorResult) MarshalRESP() []byte {
 	return respgo.EncodeError(r.String())
 }

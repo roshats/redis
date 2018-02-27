@@ -68,7 +68,7 @@ func ltrimCommand(s Storage, query Query) Result {
 	return OKResult
 }
 
-func getSubList(s Storage, key string, start, end int) ([]string, *errorResult) {
+func getSubList(s Storage, key string, start, end int) ([]string, *ErrorResult) {
 	list, errResult := parseGetList(s.Get(key))
 	if errResult != nil {
 		return nil, errResult
@@ -81,7 +81,7 @@ func getSubList(s Storage, key string, start, end int) ([]string, *errorResult) 
 	return list[start : end+1], nil
 }
 
-func parseLrangeQuery(query Query) (key string, start, end int, errResult *errorResult) {
+func parseLrangeQuery(query Query) (key string, start, end int, errResult *ErrorResult) {
 	if len(query) != 3 {
 		errResult = wrongNumberOfArgs
 		return
@@ -199,7 +199,7 @@ func popFromList(s Storage, query Query, popper func([]string) (string, []string
 	return NewStringResult(result)
 }
 
-func parseGetList(value Entry, exists bool) ([]string, *errorResult) {
+func parseGetList(value Entry, exists bool) ([]string, *ErrorResult) {
 	if !exists {
 		return nil, nil
 	}

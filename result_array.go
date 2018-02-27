@@ -5,9 +5,9 @@ import (
 	"strings"
 )
 
-type arrayResult []Result
+type ArrayResult []Result
 
-func (arr arrayResult) String() string {
+func (arr ArrayResult) String() string {
 	stringsArr := make([]string, len(arr))
 	for i := range arr {
 		stringsArr[i] = arr[i].String()
@@ -15,7 +15,7 @@ func (arr arrayResult) String() string {
 	return strings.Join(stringsArr, ", ")
 }
 
-func (arr arrayResult) MarshalRESP() []byte {
+func (arr ArrayResult) MarshalRESP() []byte {
 	stringsArr := make([][]byte, len(arr))
 	for i := range arr {
 		stringsArr[i] = arr[i].MarshalRESP()
@@ -28,5 +28,5 @@ func ArrayResultFromListOfStrings(list []string) Result {
 	for i := range list {
 		result[i] = NewStringResult(list[i])
 	}
-	return arrayResult(result)
+	return ArrayResult(result)
 }

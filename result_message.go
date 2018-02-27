@@ -2,14 +2,14 @@ package redis
 
 import "github.com/roshats/redis/internal/respgo"
 
-var OKResult = messageResult("OK")
+var OKResult = MessageResult("OK")
 
-type messageResult string
+type MessageResult string
 
-func (r messageResult) String() string {
+func (r MessageResult) String() string {
 	return string(r)
 }
 
-func (r messageResult) MarshalRESP() []byte {
+func (r MessageResult) MarshalRESP() []byte {
 	return respgo.EncodeString(string(r))
 }

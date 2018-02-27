@@ -13,7 +13,7 @@ func TestGetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := getCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -22,7 +22,7 @@ func TestGetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := getCommand(s, []string{"key1", "key2"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -33,7 +33,7 @@ func TestGetCommand(t *testing.T) {
 		s.Values["key"] = "value"
 
 		result := getCommand(s, []string{"key"})
-		str, ok := result.(stringResult)
+		str, ok := result.(StringResult)
 		Require(t, ok, "Should return string")
 		Assert(t, str == "value", "Result should match stored value")
 	})
@@ -55,7 +55,7 @@ func TestSetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := setCommand(s, []string{"key"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 		Assert(t, len(s.Values) == 0, "No value should be set when error happened")
 		Assert(t, len(s.Expires) == 0, "No expiration should be set when error happened")
@@ -66,7 +66,7 @@ func TestSetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := setCommand(s, []string{"foo", "bar", "baz"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 		Assert(t, len(s.Values) == 0, "No value should be set when error happened")
 		Assert(t, len(s.Expires) == 0, "No expiration should be set when error happened")
@@ -77,7 +77,7 @@ func TestSetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := setCommand(s, []string{"key", "value", "EX", "-1"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 		Assert(t, len(s.Values) == 0, "No value should be set when error happened")
 		Assert(t, len(s.Expires) == 0, "No expiration should be set when error happened")
@@ -88,7 +88,7 @@ func TestSetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := setCommand(s, []string{"key", "value", "expire", "1"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 		Assert(t, len(s.Values) == 0, "No value should be set when error happened")
 		Assert(t, len(s.Expires) == 0, "No expiration should be set when error happened")
@@ -151,7 +151,7 @@ func TestUpdateCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := updateCommand(s, []string{"key"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 		Assert(t, len(s.Values) == 0, "Should not set values")
 		Assert(t, len(s.Expires) == 0, "Should not set expiration")

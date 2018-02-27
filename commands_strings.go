@@ -45,7 +45,7 @@ func setCommand(s Storage, query Query) Result {
 	return OKResult
 }
 
-func parseSetCommand(queries Query) (key string, value string, expiration int64, result *errorResult) {
+func parseSetCommand(queries Query) (key string, value string, expiration int64, result *ErrorResult) {
 	switch len(queries) {
 	case 2:
 		key = queries[0]

@@ -35,7 +35,7 @@ func TestEmbeddedClientAuth(t *testing.T) {
 		cl := NewEmbeddedClient(s)
 
 		result := cl.ProcessCommand("set", []string{"hello", "world"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Assert(t, ok, "Return error")
 	})
 
@@ -43,7 +43,7 @@ func TestEmbeddedClientAuth(t *testing.T) {
 		cl := NewEmbeddedClient(s)
 
 		result := cl.ProcessCommand("auth", []string{"wrong"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Assert(t, ok, "Return error")
 	})
 

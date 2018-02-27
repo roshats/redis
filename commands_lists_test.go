@@ -10,7 +10,7 @@ func TestLlenCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := llenCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -19,7 +19,7 @@ func TestLlenCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := llenCommand(s, []string{"key1", "key2"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -28,7 +28,7 @@ func TestLlenCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := llenCommand(s, []string{"key"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 0, "Return 0 when no key")
 	})
@@ -40,7 +40,7 @@ func TestLlenCommand(t *testing.T) {
 		s.Values["key"] = []string{}
 
 		result := llenCommand(s, []string{"key"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 0, "Return 0 for empty list")
 	})
@@ -52,7 +52,7 @@ func TestLlenCommand(t *testing.T) {
 		s.Values["key"] = []string{"value1", "value2"}
 
 		result := llenCommand(s, []string{"key"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 2, "Return list length")
 	})
@@ -66,7 +66,7 @@ func TestLrangeCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := lrangeCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -75,7 +75,7 @@ func TestLrangeCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := lrangeCommand(s, []string{"key", "0"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -84,7 +84,7 @@ func TestLrangeCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := lrangeCommand(s, []string{"key", "0", "end"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error. Got %#v", result)
 	})
 
@@ -93,7 +93,7 @@ func TestLrangeCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := lrangeCommand(s, []string{"key", "0", "-1"})
-		list, ok := result.(arrayResult)
+		list, ok := result.(ArrayResult)
 		Require(t, ok, "Returns array result")
 		Assert(t, len(list) == 0, "Returns empty list")
 	})
@@ -105,7 +105,7 @@ func TestLrangeCommand(t *testing.T) {
 		s.Values["key"] = []string{"val1", "val2", "val3"}
 
 		result := lrangeCommand(s, []string{"key", "0", "2"})
-		list, ok := result.(arrayResult)
+		list, ok := result.(ArrayResult)
 		Require(t, ok, "Returns array result")
 
 		var stringsList []string
@@ -122,7 +122,7 @@ func TestLrangeCommand(t *testing.T) {
 		s.Values["key"] = []string{"val1", "val2", "val3"}
 
 		result := lrangeCommand(s, []string{"key", "-2", "2"})
-		list, ok := result.(arrayResult)
+		list, ok := result.(ArrayResult)
 		Require(t, ok, "Returns array result")
 
 		var stringsList []string
@@ -139,7 +139,7 @@ func TestLrangeCommand(t *testing.T) {
 		s.Values["key"] = []string{"val1", "val2", "val3"}
 
 		result := lrangeCommand(s, []string{"key", "-100", "2"})
-		list, ok := result.(arrayResult)
+		list, ok := result.(ArrayResult)
 		Require(t, ok, "Returns array result")
 
 		var stringsList []string
@@ -156,7 +156,7 @@ func TestLrangeCommand(t *testing.T) {
 		s.Values["key"] = []string{"val1", "val2", "val3"}
 
 		result := lrangeCommand(s, []string{"key", "100", "-1"})
-		list, ok := result.(arrayResult)
+		list, ok := result.(ArrayResult)
 		Require(t, ok, "Returns array result")
 
 		var stringsList []string
@@ -173,7 +173,7 @@ func TestLrangeCommand(t *testing.T) {
 		s.Values["key"] = []string{"val1", "val2", "val3"}
 
 		result := lrangeCommand(s, []string{"key", "0", "-2"})
-		list, ok := result.(arrayResult)
+		list, ok := result.(ArrayResult)
 		Require(t, ok, "Returns array result")
 
 		var stringsList []string
@@ -190,7 +190,7 @@ func TestLrangeCommand(t *testing.T) {
 		s.Values["key"] = []string{"val1", "val2", "val3"}
 
 		result := lrangeCommand(s, []string{"key", "0", "100"})
-		list, ok := result.(arrayResult)
+		list, ok := result.(ArrayResult)
 		Require(t, ok, "Returns array result")
 
 		var stringsList []string
@@ -209,7 +209,7 @@ func TestLtrimCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := ltrimCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -218,7 +218,7 @@ func TestLtrimCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := ltrimCommand(s, []string{"key", "0"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -227,7 +227,7 @@ func TestLtrimCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := ltrimCommand(s, []string{"key", "0", "end"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error. Got %#v", result)
 	})
 
@@ -326,7 +326,7 @@ func TestLpushCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := lpushCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -335,7 +335,7 @@ func TestLpushCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := lpushCommand(s, []string{"key"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -344,7 +344,7 @@ func TestLpushCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := lpushCommand(s, []string{"key", "val1", "val2"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 2, "Return list length")
 
@@ -360,7 +360,7 @@ func TestLpushCommand(t *testing.T) {
 		s.Values["key"] = []string{"value1", "value2"}
 
 		result := lpushCommand(s, []string{"key", "newVal1", "newVal2"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 4, "Return list length")
 
@@ -378,7 +378,7 @@ func TestRpushCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := rpushCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -387,7 +387,7 @@ func TestRpushCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := rpushCommand(s, []string{"key"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -396,7 +396,7 @@ func TestRpushCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := rpushCommand(s, []string{"key", "val1", "val2"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 2, "Return list length")
 
@@ -412,7 +412,7 @@ func TestRpushCommand(t *testing.T) {
 		s.Values["key"] = []string{"value1", "value2"}
 
 		result := rpushCommand(s, []string{"key", "newVal1", "newVal2"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 4, "Return list length")
 
@@ -430,7 +430,7 @@ func TestLpopCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := lpopCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -449,7 +449,7 @@ func TestLpopCommand(t *testing.T) {
 		s.Values["key"] = []string{"val1", "val2", "val3"}
 
 		result := lpopCommand(s, []string{"key"})
-		str, ok := result.(stringResult)
+		str, ok := result.(StringResult)
 		Require(t, ok, "Should return string")
 		Assert(t, str == "val1", "Result should match stored value")
 
@@ -466,7 +466,7 @@ func TestRpopCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := rpopCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -485,7 +485,7 @@ func TestRpopCommand(t *testing.T) {
 		s.Values["key"] = []string{"val1", "val2", "val3"}
 
 		result := rpopCommand(s, []string{"key"})
-		str, ok := result.(stringResult)
+		str, ok := result.(StringResult)
 		Require(t, ok, "Should return string")
 		Assert(t, str == "val3", "Result should match stored value")
 

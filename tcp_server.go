@@ -33,7 +33,7 @@ func handleConnection(conn net.Conn, r CommandProcessor) {
 		command = strings.ToLower(command)
 		result := r.ProcessCommand(command, query)
 		conn.Write(result.MarshalRESP())
-		if _, ok := result.(*quitResultType); ok {
+		if _, ok := result.(*QuitResultType); ok {
 			break
 		}
 	}

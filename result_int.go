@@ -5,16 +5,16 @@ import (
 	"strconv"
 )
 
-type intResult int // TODO: make int64
+type IntResult int64
 
-func NewIntResult(n int) intResult {
-	return intResult(n)
+func NewIntResult(n int) IntResult {
+	return IntResult(n)
 }
 
-func (n intResult) String() string {
+func (n IntResult) String() string {
 	return strconv.Itoa(int(n))
 }
 
-func (n intResult) MarshalRESP() []byte {
+func (n IntResult) MarshalRESP() []byte {
 	return respgo.EncodeInt(int64(n))
 }

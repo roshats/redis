@@ -2,14 +2,14 @@ package redis
 
 import "github.com/roshats/redis/internal/respgo"
 
-var NilResult = nilResultType(false)
+var NilResult = NilResultType(false)
 
-type nilResultType bool
+type NilResultType bool
 
-func (nilResultType) String() string {
+func (NilResultType) String() string {
 	return "nil"
 }
 
-func (nilResultType) MarshalRESP() []byte {
+func (NilResultType) MarshalRESP() []byte {
 	return respgo.EncodeNull()
 }

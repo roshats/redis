@@ -108,7 +108,7 @@ func hdelCommand(s Storage, query Query) Result {
 	return NewIntResult(deleted)
 }
 
-func parseDict(value Entry, exists bool) (map[string]string, *errorResult) {
+func parseDict(value Entry, exists bool) (map[string]string, *ErrorResult) {
 	if !exists {
 		return make(map[string]string), nil
 	}

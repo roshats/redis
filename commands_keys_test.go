@@ -13,7 +13,7 @@ func TestTtlCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := ttlCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -22,7 +22,7 @@ func TestTtlCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := ttlCommand(s, []string{"key"})
-		val, ok := result.(intResult)
+		val, ok := result.(IntResult)
 		Require(t, ok, "Should return int")
 		Assert(t, val == -2, "Should return -2")
 	})
@@ -36,7 +36,7 @@ func TestTtlCommand(t *testing.T) {
 		unlock()
 
 		result := ttlCommand(s, []string{"key"})
-		val, ok := result.(intResult)
+		val, ok := result.(IntResult)
 		Require(t, ok, "Should return int")
 		Assert(t, val == -1, "Should return -2")
 	})
@@ -53,7 +53,7 @@ func TestTtlCommand(t *testing.T) {
 		unlock()
 
 		result := ttlCommand(s, []string{"key"})
-		val, ok := result.(intResult)
+		val, ok := result.(IntResult)
 		Require(t, ok, "Should return int")
 
 		Assert(t, AlmostEqual(time.Now().Add(time.Duration(val)*time.Second), expirationTime),
@@ -69,7 +69,7 @@ func TestExpireCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := expireCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -78,7 +78,7 @@ func TestExpireCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := expireCommand(s, []string{"key"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -87,7 +87,7 @@ func TestExpireCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := expireCommand(s, []string{"key", "10"})
-		val, ok := result.(intResult)
+		val, ok := result.(IntResult)
 		Require(t, ok, "Should return int")
 		Assert(t, val == 0, "Should return 0")
 	})
@@ -99,7 +99,7 @@ func TestExpireCommand(t *testing.T) {
 		s.Values["key"] = "value"
 
 		result := expireCommand(s, []string{"key", "10"})
-		val, ok := result.(intResult)
+		val, ok := result.(IntResult)
 		Require(t, ok, "Should return int")
 		Assert(t, val == 1, "Should return 0")
 
@@ -116,7 +116,7 @@ func TestDelCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := delCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -132,7 +132,7 @@ func TestDelCommand(t *testing.T) {
 		s.Expires["k4"] = Timestamp(TimeAfter(time.Minute).Unix())
 
 		result := delCommand(s, []string{"k1", "k2", "k3", "unknown"})
-		val, ok := result.(intResult)
+		val, ok := result.(IntResult)
 		Require(t, ok, "Should return int")
 		Assert(t, val == 3, "3 keys should be deleted")
 

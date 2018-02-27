@@ -10,7 +10,7 @@ func TestHgetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hgetCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -19,7 +19,7 @@ func TestHgetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hgetCommand(s, []string{"key"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -56,7 +56,7 @@ func TestHgetCommand(t *testing.T) {
 		s.Values["key"] = map[string]string{"dictKey": "value"}
 
 		result := hgetCommand(s, []string{"key", "dictKey"})
-		str, ok := result.(stringResult)
+		str, ok := result.(StringResult)
 		Require(t, ok, "Returns string")
 		Assert(t, str == "value", "Returns stored value")
 	})
@@ -78,7 +78,7 @@ func TestHgetCommand(t *testing.T) {
 		s.Values["key"] = map[string]string{"dictKey": ""}
 
 		result := hgetCommand(s, []string{"key", "dictKey"})
-		str, ok := result.(stringResult)
+		str, ok := result.(StringResult)
 		Require(t, ok, "Returns string")
 		Assert(t, str == "", "Returns stored value")
 	})
@@ -92,7 +92,7 @@ func TestHgetallCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hgetallCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -111,7 +111,7 @@ func TestHgetallCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hgetallCommand(s, []string{"key"})
-		list, ok := result.(arrayResult)
+		list, ok := result.(ArrayResult)
 		Require(t, ok, "Returns array result")
 		Assert(t, len(list) == 0, "Returns empty list")
 	})
@@ -124,7 +124,7 @@ func TestHgetallCommand(t *testing.T) {
 		s.Values["key"] = storedDict
 
 		result := hgetallCommand(s, []string{"key"})
-		list, ok := result.(arrayResult)
+		list, ok := result.(ArrayResult)
 		Require(t, ok, "Returns array result")
 		Require(t, len(list)%2 == 0, "Result has even number of elements")
 
@@ -142,7 +142,7 @@ func TestHsetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hsetCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -151,7 +151,7 @@ func TestHsetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hsetCommand(s, []string{"key"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -160,7 +160,7 @@ func TestHsetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hsetCommand(s, []string{"key", "dictKey"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -169,7 +169,7 @@ func TestHsetCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hsetCommand(s, []string{"key", "dictKey", "value"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 1, "New hash key")
 
@@ -183,7 +183,7 @@ func TestHsetCommand(t *testing.T) {
 		s.Values["key"] = map[string]string{"dictKey": "value"}
 
 		result := hsetCommand(s, []string{"key", "dictKey", "newVal"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 0, "New hash key")
 
@@ -199,7 +199,7 @@ func TestHdelCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hdelCommand(s, nil)
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -208,7 +208,7 @@ func TestHdelCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hdelCommand(s, []string{"key"})
-		_, ok := result.(*errorResult)
+		_, ok := result.(*ErrorResult)
 		Require(t, ok, "Should return error")
 	})
 
@@ -217,7 +217,7 @@ func TestHdelCommand(t *testing.T) {
 
 		s := NewMockStorage()
 		result := hdelCommand(s, []string{"key", "dictKey"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 0, "Return number of deleted keys")
 	})
@@ -229,7 +229,7 @@ func TestHdelCommand(t *testing.T) {
 		s.Values["key"] = map[string]string{"k1": "v1", "k2": "v2", "k3": "v3"}
 
 		result := hdelCommand(s, []string{"key", "k1", "k2", "unknown"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 2, "Return number of deleted keys")
 
@@ -244,7 +244,7 @@ func TestHdelCommand(t *testing.T) {
 		s.Values["key"] = map[string]string{"k1": "v1", "k2": "v2", "k3": "v3"}
 
 		result := hdelCommand(s, []string{"key", "k1", "k2", "k3"})
-		value, ok := result.(intResult)
+		value, ok := result.(IntResult)
 		Require(t, ok, "Return int result")
 		Assert(t, value == 3, "Return number of deleted keys")
 

@@ -1,7 +1,7 @@
 package redis
 
-var QuitResult = &quitResultType{OKResult}
+var QuitResult = &QuitResultType{OKResult}
 
-type quitResultType struct {
-	messageResult
+type QuitResultType struct {
+	MessageResult
 }
