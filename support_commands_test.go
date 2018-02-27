@@ -1,6 +1,5 @@
 package redis
 
-// TODO: Use MemoryStorage
 type MockStorage struct {
 	Values  map[string]interface{}
 	Expires map[string]Timestamp
